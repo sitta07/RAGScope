@@ -1,0 +1,13 @@
+streamlit
+chromadb
+langchain
+langchain-community
+langchain-huggingface
+sentence-transformers
+umap-learn
+pypdf
+tqdm
+plotly
+scikit-learn
+langchain-groq
+python-dotenv
