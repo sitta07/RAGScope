@@ -1,13 +1,15 @@
 streamlit
-chromadb
+pandas
+plotly
+umap-learn
+sentence-transformers
+tqdm
+pypdf
+python-dotenv
+# Modern LangChain Stack
 langchain
+langchain-core
 langchain-community
 langchain-huggingface
-sentence-transformers
-umap-learn
-pypdf
-tqdm
-plotly
-scikit-learn
 langchain-groq
-python-dotenv
+langchain-chroma

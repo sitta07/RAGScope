@@ -26,8 +26,9 @@ cd rag-observability-platform
 
 2. **Create Virtual Environment**
 ```bash
-python -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install --upgrade pip
 ```
 
 3. **Install Dependencies**
@@ -42,5 +43,6 @@ python src/ingest.py
 ```
 5. **Run the App**
 ```bash
-streamlit run src/app.py
+export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+python -m streamlit run src/app.py
 ```

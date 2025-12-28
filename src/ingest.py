@@ -5,13 +5,11 @@ import pandas as pd
 import umap.umap_ as umap
 from tqdm import tqdm
 from uuid import uuid4
-
-# LangChain Imports
 from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 # Configuration
 DATA_PATH = "./data"
