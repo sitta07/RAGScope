@@ -1,0 +1,103 @@
+Source: The Standard Book of Spells, Grade 1-7
+Category: Magic Spells & Charms
+
+Expelliarmus (The Disarming Charm)
+Description: A foundational defensive charm designed to neutralize an opponent without causing lasting harm. While commonly associated with dueling etiquette, its simplicity masks deep versatility.
+Incantation: Ex-pel-ee-AR-mus
+Light: Scarlet
+Effect: Forces the target to release whatever they are holding, most often a wand. When cast with sufficient power or emotional intent, it can physically knock an opponent backward or shatter weaker enchantments.
+Advanced Notes and Lore:
+Repeated use of Expelliarmus became a recognizable magical “signature,” allowing experienced observers to identify Harry Potter during battles.
+The spell can disarm multiple opponents simultaneously if cast with wide intent and sufficient power.
+Symbolically associated with defensive morality, favoring protection and restraint over domination.
+
+Expecto Patronum (The Patronus Charm)
+Description: One of the most advanced defensive charms taught at Hogwarts, requiring focused happiness, emotional resilience, and mental clarity. It manifests protective positive energy.
+Incantation: Ex-pek-toh pa-TRO-num
+Light: Silver
+Effect: Conjures a Patronus, either corporeal (animal form) or non-corporeal (mist-like). Fully corporeal Patronuses can repel Dementors, Lethifolds, and certain Dark enchantments.
+Advanced Notes and Lore:
+The Patronus form reflects core personality traits, not surface preferences.
+A Patronus may change form after profound emotional shifts, as seen with Nymphadora Tonks and Severus Snape.
+Very few witches and wizards can cast this charm reliably; mastery is considered Auror-level skill.
+
+Avada Kedavra (The Killing Curse)
+Description: One of the three Unforgivable Curses. Requires strong intent to kill; casual casting will fail.
+Incantation: A-VA-da ke-DA-vra
+Light: Blinding Green
+Effect: Causes immediate death by forcibly severing the soul from the body. Leaves no physical damage.
+Advanced Notes and Lore:
+The curse cannot be blocked by magical shields, only by physical obstacles or sacrificial protection.
+Repeated use visibly deforms the caster’s soul.
+Harry Potter’s survival was due to sacrificial protection and wand core resonance, not resistance to the spell itself.
+
+Wingardium Leviosa (The Levitation Charm)
+Description: A basic but essential charm allowing objects to defy gravity. Often underestimated due to its early introduction.
+Incantation: Win-GAR-dee-um Lev-ee-OH-sa
+Light: None or faint blue shimmer
+Effect: Causes objects to levitate and move according to wand motion. Precision improves with wrist control rather than force.
+Advanced Notes and Lore:
+Incorrect pronunciation destabilizes the charm.
+Used in advanced spellwork as a base layer for flight-related enchantments.
+Combined with other charms to construct complex moving systems within Hogwarts.
+
+Sectumsempra
+Description: A highly dangerous dark curse developed by Severus Snape for personal defense during his school years.
+Effect: Inflicts deep, violent slashing wounds as if cut by an invisible blade.
+Counter-curse: Vulnera Sanentur
+Advanced Notes and Lore:
+The curse responds to emotional aggression and hostility.
+Standard healing spells are ineffective; only the specific counter-curse can close the wounds.
+Its invention demonstrates Snape’s early mastery of spell creation.
+
+Protego (The Shield Charm)
+Description: A defensive charm that conjures a magical barrier to deflect spells and physical objects.
+Incantation: Pro-TAY-go
+Light: Translucent shimmer
+Effect: Blocks or deflects minor to moderate spells depending on caster strength.
+Advanced Notes and Lore:
+Variants include Protego Maxima and Protego Totalum for area-wide protection.
+Cannot block Unforgivable Curses.
+Effectiveness depends heavily on reaction speed and intent.
+
+Lumos / Nox
+Description: Basic illumination charm and its counter.
+Incantation: LOO-mos / Nox
+Light: White
+Effect: Produces light from wand tip; Nox extinguishes it.
+Advanced Notes and Lore:
+Brightness can be modulated subconsciously.
+Useful for detecting hidden enchantments and magical residue.
+Prolonged Lumos use may reveal the caster’s location in stealth situations.
+
+Petrificus Totalus (The Full Body-Bind Curse)
+Description: A curse that immobilizes the target completely.
+Incantation: Pe-TRI-fi-cus To-TAH-lus
+Light: None or pale gray flash
+Effect: Paralyzes the body while leaving consciousness intact.
+Advanced Notes and Lore:
+Often used in ambush or escape situations.
+Long-term exposure can cause muscle trauma if not released properly.
+Countered by Finite Incantatem or manual reversal.
+
+Accio (The Summoning Charm)
+Description: Draws an object toward the caster regardless of distance, provided the caster knows its location.
+Incantation: AK-see-oh
+Light: None
+Effect: Causes target object to fly into the caster’s hand.
+Advanced Notes and Lore:
+Requires mental clarity and spatial awareness.
+Can summon objects through walls and obstacles.
+Overuse may result in magical fatigue due to spatial strain.
+
+Obliviate (The Memory Charm)
+Description: Alters, removes, or suppresses memories.
+Incantation: Oh-BLI-vee-ate
+Light: Pale green or white
+Effect: Erases or modifies specific memories.
+Advanced Notes and Lore:
+Precision determines whether memories are altered cleanly or damaged.
+Improper use can cause permanent cognitive impairment.
+Widely used by the Ministry to maintain the Statute of Secrecy.
+
+Magic taught in classrooms is only the surface layer. True mastery emerges when intention, emotion, ethics, and control align. Spells do not merely obey words; they respond to the wizard behind the wand.

@@ -1,6 +1,0 @@
-IT Support Guidelines
-1. Password Policy: Passwords must be updated every 90 days and must contain at least one special character.
-2. VPN Access: To access internal servers from home, you must use the Cisco AnyConnect VPN.
-3. Software Installation: Employees are not allowed to install unauthorized software on company machines.
-4. Hardware Issues: For any laptop malfunction, open a ticket at support.company.com or call ext 5555.
-5. Data Security: Do not share sensitive customer data via email. Use the encrypted file transfer portal.
