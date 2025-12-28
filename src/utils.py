@@ -1,7 +1,8 @@
 import streamlit as st
+import os
 import time
+import re
 import pandas as pd
-import random
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
@@ -12,38 +13,83 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
 from langchain_community.retrievers import BM25Retriever
 
-# Constants
+# --- Configuration ---
+DATA_FOLDER = "./data" 
 DB_PATH = "./processed_data/chroma_db"
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-# Metadata (เหมือนเดิม)
+# --- Metadata ---
 TECHNIQUE_INFO = {
-    "Hybrid Search": { "desc": "ผสม Vector + Keyword", "suitable": "ศัพท์เฉพาะ", "popularity": "⭐⭐⭐⭐⭐", "pair_with": "Reranking" },
-    "Reranking": { "desc": "จัดลำดับใหม่ด้วยบริบท", "suitable": "ความแม่นยำสูง", "popularity": "⭐⭐⭐⭐⭐", "pair_with": "Hybrid" },
-    "Parent-Document": { "desc": "ดึงบริบทกว้างขึ้น", "suitable": "ข้อมูลซับซ้อน", "popularity": "⭐⭐⭐⭐", "pair_with": "Compression" },
-    "Multi-Query": { "desc": "แตกคำถามหลากหลาย", "suitable": "คำถามกำกวม", "popularity": "⭐⭐⭐", "pair_with": "Reranking" },
-    "Query Rewriting": { "desc": "ปรับแก้คำถามให้ชัด", "suitable": "User ทั่วไป", "popularity": "⭐⭐⭐⭐", "pair_with": "All" }
+    "Hybrid Search": {
+        "desc": "Keyword + Vector Search combination.",
+        "pros": "Balances exact matches with semantic meaning.",
+        "cons": "Slightly slower merge process.",
+        "pair_with": "Reranking"
+    },
+    "Reranking": {
+        "desc": "LLM-based scoring of retrieved documents.",
+        "pros": "High precision, filters irrelevant chunks.",
+        "cons": "Higher latency (LLM calls).",
+        "pair_with": "Hybrid, Multi-Query"
+    },
+    "Parent-Document": {
+        "desc": "Retrieves chunk -> Fetches FULL original file content.",
+        "pros": "Zero missing context.",
+        "cons": "Very high token usage (reads full files).",
+        "pair_with": "Context Compression"
+    },
+    "Multi-Query": {
+        "desc": "Generates 3 query variations & searches for all.",
+        "pros": "Captures different phrasings.",
+        "cons": "3x Database load.",
+        "pair_with": "Reranking"
+    },
+    "Sub-Query": {
+        "desc": "Breaks complex queries into steps & solves sequentially.",
+        "pros": "Solves multi-hop logic problems.",
+        "cons": "Slowest technique.",
+        "pair_with": "Reranking"
+    },
+    "HyDE": {
+        "desc": "Hallucinates an answer first, then searches.",
+        "pros": "Good for zero-shot tasks.",
+        "cons": "Risk of misleading search.",
+        "pair_with": "Hybrid"
+    },
+    "Context Compression": {
+        "desc": "LLM extracts ONLY relevant sentences.",
+        "pros": "Reduces noise and tokens.",
+        "cons": "Slow (requires LLM processing).",
+        "pair_with": "Parent-Document"
+    },
+    "Query Rewriting": {
+        "desc": "Optimizes query for search engine.",
+        "pros": "Standard best practice.",
+        "cons": "Minor latency.",
+        "pair_with": "All"
+    }
 }
 
+PIPELINE_PRESETS = {
+    "Balanced (GPT-4)": {"desc": "Good balance.", "techs": ["Hybrid Search", "Query Rewriting"]},
+    "Deep Research": {"desc": "Max context.", "techs": ["Hybrid Search", "Reranking", "Parent-Document", "Multi-Query"]},
+    "Fast Retrieval": {"desc": "Speed focused.", "techs": ["Hybrid Search", "Context Compression"]},
+    "Logic/Reasoning": {"desc": "Complex queries.", "techs": ["Sub-Query", "Reranking"]}
+}
+
+# --- Database & File IO ---
 @st.cache_resource
-def load_vector_db(collection_name="harry_potter_lore"):
-    embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+def load_vector_db(collection_name):
+    embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     return Chroma(persist_directory=DB_PATH, embedding_function=embedding_function, collection_name=collection_name)
 
-@st.cache_resource
-def get_all_documents_metadata(_vector_db):
-    try:
-        data = _vector_db.get(include=["metadatas"])
-        return pd.DataFrame(data['metadatas'])
-    except:
-        return pd.DataFrame(columns=["source_doc"])
-
-def get_source_content(_vector_db, source_name):
-    try:
-        results = _vector_db.get(where={"source_doc": source_name})
-        return results['documents']
-    except:
-        return []
+def get_full_file_content(filename):
+    """Real Parent-Document Logic: Read from disk"""
+    path = os.path.join(DATA_FOLDER, filename)
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    return "[Error: File not found for Parent-Document Retrieval]"
 
 def calculate_cost(text):
     tokens = len(text) / 4
@@ -52,129 +98,175 @@ def calculate_cost(text):
 
 def get_llm(api_key):
     if not api_key: return None
-    # เพิ่ม temperature นิดหน่อยเพื่อให้มีความคิดสร้างสรรค์ในการ Rewrite
-    return ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile", temperature=0.3)
+    # Use explicit temperature 0 for consistent reasoning
+    return ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile", temperature=0.0)
 
 def format_docs(docs):
-    # ใส่ชื่อ Source เข้าไปใน Context ด้วย เพื่อให้ AI อ้างอิงได้
     return "\n\n".join(f"[Source: {d.metadata.get('source_doc', 'Unknown')}] {d.page_content}" for d in docs)
 
-def merge_documents(vector_docs, keyword_docs):
-    # Logic: เอา Vector ขึ้นก่อน แล้วเติมด้วย Keyword ที่ไม่ซ้ำ
+def merge_documents(v_docs, k_docs):
+    """Real Merge: Deduplicate by content"""
     seen = set()
-    unique_docs = []
-    for d in vector_docs:
-        if d.page_content not in seen:
-            unique_docs.append(d)
-            seen.add(d.page_content)
-    for d in keyword_docs:
-        if d.page_content not in seen:
-            unique_docs.append(d)
-            seen.add(d.page_content)
-    return unique_docs[:5] # เอา Top 5
+    merged = []
+    max_len = max(len(v_docs), len(k_docs))
+    for i in range(max_len):
+        if i < len(v_docs):
+            d = v_docs[i]
+            if d.page_content not in seen:
+                merged.append(d)
+                seen.add(d.page_content)
+        if i < len(k_docs):
+            d = k_docs[i]
+            if d.page_content not in seen:
+                merged.append(d)
+                seen.add(d.page_content)
+    return merged
 
-# 🔥 Core Pipeline Logic (Updated)
+# --- 🎯 CORE RAG PIPELINE (REAL LOGIC) ---
 def perform_rag(query, vector_db, llm, selected_techniques):
     start_time = time.time()
     current_query = query
     docs = []
-    log_steps = [] # เก็บ Log การทำงานไว้โชว์ user
+    log_steps = []
 
-    if not llm:
-        return "⚠️ Please provide API Key", [], 0.0, 0, 0.0
+    if not llm: return "API Key Missing", [], 0, 0, 0, []
 
-    # 1. Query Transformation (ทำงานจริงแล้ว!)
+    # 1. Query Rewriting
     if "Query Rewriting" in selected_techniques:
-        rewrite_prompt = ChatPromptTemplate.from_template(
-            "Rephrase the following question to be more specific and optimized for a search engine. Question: {q}"
+        prompt = ChatPromptTemplate.from_template(
+            """Rewrite this query to be specific and keyword-rich for a database search.
+            Output ONLY the query string. No quotes.
+            Query: {q}"""
         )
-        chain = rewrite_prompt | llm | StrOutputParser()
-        original_query = current_query
-        current_query = chain.invoke({"q": query})
-        log_steps.append(f"🔄 Rewrote query: '{original_query}' -> '{current_query}'")
+        new_query = (prompt | llm | StrOutputParser()).invoke({"q": query}).strip()
+        if len(new_query) < len(query) * 3: 
+            log_steps.append(f"🔄 Rewrote: '{query}' -> '{new_query}'")
+            current_query = new_query
+        else:
+            log_steps.append("⚠️ Rewrite ignored (too long).")
 
+    # 2. HyDE
+    if "HyDE" in selected_techniques:
+        prompt = ChatPromptTemplate.from_template("Write a concise hypothetical answer to: {q}")
+        fake_ans = (prompt | llm | StrOutputParser()).invoke({"q": current_query})
+        log_steps.append("👻 HyDE: Generated hypothetical answer.")
+        current_query = f"{current_query} {fake_ans}"
+
+    # 3. Multi-Query / Sub-Query (🔥 FIX: ALWAYS KEEP MAIN QUERY)
+    queries_to_run = [current_query] 
+    
     if "Multi-Query" in selected_techniques:
-        mq_prompt = ChatPromptTemplate.from_template(
-            "Generate 3 different versions of this question to retrieve better information. Separate them by newlines. Question: {q}"
-        )
-        chain = mq_prompt | llm | StrOutputParser()
-        variations = chain.invoke({"q": current_query}).split("\n")
-        log_steps.append(f"🔀 Multi-Query generated: {variations}")
-        # ใน Demo นี้เราจะใช้ Query ตัวแรกสุดที่ Gen มาเพื่อความง่ายในการ flow
-        if variations: current_query = variations[0]
+        prompt = ChatPromptTemplate.from_template("Generate 2 alternative search queries for: {q}. Sep by newline.")
+        vars = (prompt | llm | StrOutputParser()).invoke({"q": current_query}).split("\n")
+        cleaned_vars = [v.strip() for v in vars if v.strip()]
+        queries_to_run.extend(cleaned_vars[:2])
+        log_steps.append(f"🔀 Multi-Query: Added {len(cleaned_vars)} variations.")
 
-    # 2. Retrieval
+    if "Sub-Query" in selected_techniques:
+        prompt = ChatPromptTemplate.from_template("Break down '{q}' into 2 sub-questions. Sep by newline.")
+        vars = (prompt | llm | StrOutputParser()).invoke({"q": query}).split("\n")
+        cleaned_vars = [v.strip() for v in vars if v.strip()]
+        # 🔥 FIX: Extend instead of replace
+        queries_to_run.extend(cleaned_vars[:2])
+        log_steps.append(f"🧱 Sub-Query: Added {len(cleaned_vars)} steps.")
+
+    # --- RETRIEVAL PHASE ---
     all_data = vector_db.get()
-    all_docs_list = [Document(page_content=t, metadata=m) for t, m in zip(all_data['documents'], all_data['metadatas'])]
+    all_docs_objs = [Document(page_content=t, metadata=m) for t, m in zip(all_data['documents'], all_data['metadatas'])]
     
-    # Base Search
-    v_retriever = vector_db.as_retriever(search_kwargs={"k": 5})
-    bm25_retriever = BM25Retriever.from_documents(all_docs_list)
-    bm25_retriever.k = 5
+    temp_docs = []
+    # Increase K to ensure we catch the Bio chunk even with many queries
+    INITIAL_K = 10 if ("Reranking" in selected_techniques) else 5
+    
+    for q in queries_to_run:
+        v_res = vector_db.as_retriever(search_kwargs={"k": INITIAL_K}).invoke(q)
+        k_res = []
+        if "Hybrid Search" in selected_techniques:
+            bm25 = BM25Retriever.from_documents(all_docs_objs)
+            bm25.k = INITIAL_K
+            k_res = bm25.invoke(q)
+        
+        merged = merge_documents(v_res, k_res)
+        temp_docs.extend(merged)
 
-    if "Hybrid Search" in selected_techniques:
-        v_docs = v_retriever.invoke(current_query)
-        k_docs = bm25_retriever.invoke(current_query)
-        docs = merge_documents(v_docs, k_docs)
-        log_steps.append(f"⚡ Hybrid merged {len(v_docs)} vector results with {len(k_docs)} keyword results.")
-    else:
-        # Default Semantic
-        docs = v_retriever.invoke(current_query)
+    # Deduplicate
+    docs = merge_documents(temp_docs, [])
+    log_steps.append(f"🔍 Retrieval: Pool of {len(docs)} docs from {len(queries_to_run)} queries.")
 
-    # 3. Post-Processing
-    if "Reranking" in selected_techniques:
-        # 💡 Logic จริง: ให้ LLM เป็นคน Judge ว่า Document ไหนตรงคำถามที่สุด (LLM-based Reranking)
-        # วิธีนี้ช้าหน่อยแต่แม่นและเห็นผลชัดกว่า Mock
-        rerank_prompt = ChatPromptTemplate.from_template(
-            """Rank these documents based on relevance to the query: '{q}'. 
-            Return only the indices of the top 3 most relevant documents (e.g., 0, 2, 1).
-            Documents:
-            {docs_str}
-            """
-        )
-        docs_str = "\n".join([f"[{i}] {d.page_content[:100]}..." for i, d in enumerate(docs)])
-        try:
-            indices_str = (rerank_prompt | llm | StrOutputParser()).invoke({"q": current_query, "docs_str": docs_str})
-            # พยายามแกะตัวเลขออกมา
-            import re
-            indices = [int(s) for s in re.findall(r'\b\d+\b', indices_str)][:3]
-            if indices:
-                docs = [docs[i] for i in indices if i < len(docs)]
-                log_steps.append(f"🥇 Reranked top documents: {indices}")
-        except:
-            log_steps.append("⚠️ Reranking failed, using original order.")
+    # --- POST-PROCESSING ---
 
-    # 4. Generation (Prompt แบบ Senior)
+    # 4. Reranking (Real LLM Scoring)
+    if "Reranking" in selected_techniques and docs:
+        log_steps.append("🥇 Reranking: LLM Scoring...")
+        scored = []
+        for d in docs:
+            # Tuned Prompt: Give bonus for direct definitions/bios
+            prompt = ChatPromptTemplate.from_template(
+                """Rate relevance (0-10) of the text to query '{q}'. 
+                If the text contains a direct definition, biography, or exact answer, give 10.
+                Output ONLY the number.
+                Text: {t}"""
+            )
+            try:
+                res = (prompt | llm | StrOutputParser()).invoke({"q": query, "t": d.page_content[:500]})
+                score = float(re.search(r'\d+', res).group())
+            except:
+                score = 5.0
+            d.metadata['score'] = score
+            scored.append(d)
+        
+        docs = sorted(scored, key=lambda x: x.metadata.get('score', 0), reverse=True)[:5]
+
+    # 5. Parent-Document
+    if "Parent-Document" in selected_techniques and docs:
+        log_steps.append("📂 Parent-Document: Fetching FULL files...")
+        new_docs = []
+        processed_files = set()
+        for d in docs:
+            fname = d.metadata.get('source_doc')
+            if fname and fname not in processed_files:
+                full_text = get_full_file_content(fname)
+                if not full_text.startswith("[Error"):
+                    new_d = Document(page_content=full_text, metadata=d.metadata)
+                    new_docs.append(new_d)
+                    processed_files.add(fname)
+        if new_docs:
+            docs = new_docs[:2]
+
+    # 6. Context Compression
+    if "Context Compression" in selected_techniques and docs:
+        log_steps.append("✂️ Compression: Extracting key info...")
+        compressed = []
+        for d in docs:
+            if len(d.page_content) > 500:
+                prompt = ChatPromptTemplate.from_template(
+                    "Extract sentences answering '{q}' from text. Keep names/dates. Text: {t}"
+                )
+                extracted = (prompt | llm | StrOutputParser()).invoke({"q": query, "t": d.page_content[:1500]})
+                d.page_content = extracted
+            compressed.append(d)
+        docs = compressed
+
+    # --- GENERATION ---
     template = """
-    You are an expert Historian and Analyst of the Wizarding World.
-    Your goal is to provide a comprehensive, detailed, and well-structured answer.
-    
-    Guidelines:
-    - Use the Context provided below to answer the user's question.
-    - If the context mentions specific details (spells, dates, relationships), cite them.
-    - Explain the "Why" and "How", not just the "What".
-    - If different sources in the context say different things, mention the conflict.
-    - Use bullet points for clarity if listing items.
+    Answer clearly based ONLY on context. If context is missing, say "I don't know".
     
     Context:
     {context}
     
     Question: {question}
     
-    Detailed Answer:
+    Answer:
     """
-    
     prompt = ChatPromptTemplate.from_template(template)
     chain = {"context": lambda x: format_docs(docs), "question": RunnablePassthrough()} | prompt | llm | StrOutputParser()
     
     try:
-        answer = chain.invoke(current_query)
+        answer = chain.invoke(query)
     except Exception as e:
         answer = f"Error: {e}"
-    
-    latency = time.time() - start_time
-    total_text = current_query + format_docs(docs) + answer
-    tokens, cost = calculate_cost(total_text)
-    
-    # แนบ Log Steps ไปกับ docs เพื่อเอาไปโชว์ใน UI
-    return answer, docs, latency, tokens, cost, log_steps
+
+    lat = time.time() - start_time
+    tokens, cost = calculate_cost(query + format_docs(docs) + answer)
+
+    return answer, docs, lat, tokens, cost, log_steps

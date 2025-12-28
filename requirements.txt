@@ -14,3 +14,4 @@ langchain-huggingface
 langchain-groq
 langchain-chroma
 rank_bm25
+graphviz
