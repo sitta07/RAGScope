@@ -2,6 +2,23 @@
 
 TEXTS = {
     "en": {
+        # --- Welcome Page ---
+        "welcome_title": "RAGScope Pro",
+        "welcome_sub": "Advanced RAG Engine powered by Llama 3<br>Exploring the Wizarding World of <b>Harry Potter</b>",
+        "feat_1_title": "Domain Knowledge",
+        "feat_1_desc": "We use the <b>Harry Potter Lore</b> dataset. AI retrieves specific facts from local files instead of general training data.",
+        "feat_2_title": "Advanced RAG",
+        "feat_2_desc": "Not just a simple search. We implement <b>8 production-grade techniques</b> including Hybrid Search, Reranking, and HyDE.",
+        "feat_3_title": "Transparent Logic",
+        "feat_3_desc": "See exactly how AI thinks. We provide real-time <b>Execution Logs</b>, <b>Cost Analysis</b>, and <b>A/B Testing</b>.",
+        "get_started": "Get Started",
+        "api_req": "This system requires a Groq API Key to run the Llama 3 model (70B).",
+        "enter_key": "Enter Groq API Key",
+        "btn_enter": "Enter System",
+        "invalid_key": "Invalid API Key format. It should start with 'gsk_'",
+        "access_granted": "Access Granted! Redirecting...",
+
+        # --- Dashboard ---
         "title": "RAGScope Pro",
         "subheader_config": "Pipeline Configuration",
         "subheader_chat": "Chat Interface",
@@ -19,9 +36,10 @@ TEXTS = {
         "btn_read": "Read File",
         "btn_compare": "Compare Strategies",
         "learn_intro": "Learn RAG concepts from scratch, just like a Computer Science 101 class.",
-        # REWRITTEN (EN): CS101 Education Style
-        "lessons": {
-            "Hybrid Search": {
+        # (Lessons ส่วนเดิม...)
+        "lessons": { 
+            # ... (คงเดิม ไม่ต้องแก้ส่วน lessons) ... 
+             "Hybrid Search": {
                 "concept": "Keyword Match (Ctrl+F) + Semantic Match (Meaning)",
                 "problem": "Basics: A 'Keyword' is an exact string of characters.\n\nScenario: You search for 'PC'.\n- Keyword Search: Finds text containing 'PC'.\n- Problem: It misses text containing 'Computer' or 'Laptop' because the strings don't match.\n- Vector Search: Finds 'Laptop' because it knows it means the same as 'PC', but might miss specific part numbers like 'PC-98'.",
                 "process": "1. Run 'Keyword Search' (BM25) to catch exact terms.\n2. Run 'Vector Search' (Embeddings) to catch related meanings.\n3. Merge the two lists (Weighted Sum) to get the best of both worlds.",
@@ -72,6 +90,23 @@ TEXTS = {
         }
     },
     "th": {
+        # --- Welcome Page (Thai) ---
+        "welcome_title": "RAGScope Pro",
+        "welcome_sub": "ระบบ RAG อัจฉริยะ ขับเคลื่อนด้วย Llama 3<br>สำรวจโลกเวทมนตร์ของ <b>Harry Potter</b>",
+        "feat_1_title": "ความรู้เฉพาะทาง",
+        "feat_1_desc": "เราใช้ฐานข้อมูล <b>Harry Potter Lore</b> เป็นแหล่งความรู้ AI จะดึงข้อมูลจริงจากไฟล์ Local แทนที่จะตอบกว้างๆ",
+        "feat_2_title": "เทคนิค RAG ขั้นสูง",
+        "feat_2_desc": "ไม่ใช่แค่การค้นหาธรรมดา แต่ใช้ <b>8 เทคนิคระดับ Production</b> เช่น Hybrid Search, Reranking และ HyDE",
+        "feat_3_title": "ระบบโปร่งใส",
+        "feat_3_desc": "ดูวิธีคิดของ AI ได้ทุกขั้นตอน ผ่านระบบ <b>Execution Logs</b>, <b>วิเคราะห์ต้นทุน</b> และเครื่องมือ <b>A/B Testing</b>",
+        "get_started": "เริ่มต้นใช้งาน",
+        "api_req": "ระบบต้องใช้ Groq API Key เพื่อรันโมเดล Llama 3 (70B) ในการประมวลผล",
+        "enter_key": "กรอก Groq API Key",
+        "btn_enter": "เข้าสู่ระบบ",
+        "invalid_key": "รูปแบบ API Key ไม่ถูกต้อง ต้องขึ้นต้นด้วย 'gsk_'",
+        "access_granted": "ยืนยันตัวตนสำเร็จ! กำลังเข้าสู่ระบบ...",
+
+        # --- Dashboard (Thai) ---
         "title": "RAGScope Pro",
         "subheader_config": "ตั้งค่ากระบวนการ (Pipeline)",
         "subheader_chat": "ระบบสนทนา",
@@ -89,9 +124,9 @@ TEXTS = {
         "btn_read": "อ่านไฟล์",
         "btn_compare": "เริ่มเปรียบเทียบ",
         "learn_intro": "เรียนรู้หลักการทำงานของ RAG เหมือนนั่งเรียนวิชาเขียนโปรแกรมเบื้องต้น",
-        # REWRITTEN (TH): CS101 Education Style
-        "lessons": {
-            "Hybrid Search": {
+        # (Lessons ส่วนเดิม...)
+        "lessons": { 
+             "Hybrid Search": {
                 "concept": "การค้นหาแบบผสม (Keyword Match + Semantic Match)",
                 "problem": "พื้นฐาน: 'Keyword' คือข้อความที่ต้องตรงกันเป๊ะๆ (เหมือนกด Ctrl+F)\n\nสถานการณ์: คุณค้นหาคำว่า 'ยารักษาหวัด'\n- Keyword Search: จะหาเฉพาะเอกสารที่มีคำว่า 'ยารักษาหวัด' เป๊ะๆ\n- ปัญหา: มันจะไม่เจอเอกสารที่เขียนว่า 'สมุนไพรแก้คัดจมูก' (เพราะตัวอักษรไม่เหมือนกัน)\n- Vector Search: จะหาเจอ เพราะมันรู้ว่า 'หวัด' กับ 'คัดจมูก' คือเรื่องเดียวกัน",
                 "process": "1. รันระบบหาคำตรงตัว (BM25) เพื่อเก็บตกคำเฉพาะ (เช่น ชื่อยา)\n2. รันระบบหาความหมาย (Vector) เพื่อเก็บตกคำที่เขียนไม่เหมือนกัน\n3. เอาผลลัพธ์มารวมกัน เพื่อปิดจุดอ่อนของทั้งคู่",
