@@ -6,10 +6,12 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
 from langchain_community.retrievers import BM25Retriever
 
+# Import จาก Modules ข้างเคียง
 from .database import get_full_file_content
 from .config import DATA_FOLDER
 
 def calculate_cost(text):
+    # คำนวณราคาคร่าวๆ (Llama 3 บน Groq ฟรี แต่เราโชว์ให้ดู Pro)
     tokens = len(text) / 4
     cost = (tokens / 1000) * 0.0005 
     return int(tokens), cost
@@ -18,6 +20,7 @@ def format_docs(docs):
     return "\n\n".join(f"[Source: {d.metadata.get('source_doc', 'Unknown')}] {d.page_content}" for d in docs)
 
 def merge_documents(v_docs, k_docs):
+    # รวมผลลัพธ์จาก Vector (v_docs) และ Keyword (k_docs) โดยตัดตัวซ้ำ
     seen = set()
     merged = []
     max_len = max(len(v_docs), len(k_docs))
@@ -42,30 +45,24 @@ def perform_rag(query, vector_db, llm, selected_techniques):
 
     if not llm: return "API Key Missing", [], 0, 0, 0, []
 
-    # 1. Query Rewriting (Real)
+    # 1. Query Rewriting
     if "Query Rewriting" in selected_techniques:
         prompt = ChatPromptTemplate.from_template(
-            """Rewrite this query to be specific and keyword-rich for a database search.
-            Output ONLY the query string. No quotes.
-            Query: {q}"""
+            "Rewrite this query to be specific for a search engine. Query: {q}"
         )
         new_query = (prompt | llm | StrOutputParser()).invoke({"q": query}).strip()
-        if len(new_query) < len(query) * 3: 
-            log_steps.append(f"🔄 Rewrote: '{query}' -> '{new_query}'")
-            current_query = new_query
-        else:
-            log_steps.append("⚠️ Rewrite ignored (too long).")
+        log_steps.append(f"🔄 Rewrote: '{query}' -> '{new_query}'")
+        current_query = new_query
 
-    # 2. HyDE (Real)
+    # 2. HyDE
     if "HyDE" in selected_techniques:
-        prompt = ChatPromptTemplate.from_template("Write a concise hypothetical answer to: {q}")
+        prompt = ChatPromptTemplate.from_template("Write a hypothetical answer to: {q}")
         fake_ans = (prompt | llm | StrOutputParser()).invoke({"q": current_query})
         log_steps.append("👻 HyDE: Generated hypothetical answer.")
         current_query = f"{current_query} {fake_ans}"
 
-    # 3. Multi-Query / Sub-Query (Real Loop)
+    # 3. Multi-Query
     queries_to_run = [current_query]
-    
     if "Multi-Query" in selected_techniques:
         prompt = ChatPromptTemplate.from_template("Generate 2 alternative search queries for: {q}. Sep by newline.")
         vars = (prompt | llm | StrOutputParser()).invoke({"q": current_query}).split("\n")
@@ -73,14 +70,8 @@ def perform_rag(query, vector_db, llm, selected_techniques):
         queries_to_run.extend(cleaned_vars[:2])
         log_steps.append(f"🔀 Multi-Query: Added {len(cleaned_vars)} variations.")
 
-    if "Sub-Query" in selected_techniques:
-        prompt = ChatPromptTemplate.from_template("Break down '{q}' into 2 sub-questions. Sep by newline.")
-        vars = (prompt | llm | StrOutputParser()).invoke({"q": query}).split("\n")
-        cleaned_vars = [v.strip() for v in vars if v.strip()]
-        queries_to_run.extend(cleaned_vars[:2])
-        log_steps.append(f"🧱 Sub-Query: Added {len(cleaned_vars)} steps.")
-
-    # --- RETRIEVAL PHASE ---
+    # --- RETRIEVAL ---
+    # ดึงข้อมูลจริงจาก DB
     all_data = vector_db.get()
     all_docs_objs = [Document(page_content=t, metadata=m) for t, m in zip(all_data['documents'], all_data['metadatas'])]
     
@@ -88,9 +79,10 @@ def perform_rag(query, vector_db, llm, selected_techniques):
     INITIAL_K = 10 if ("Reranking" in selected_techniques) else 5
     
     for q in queries_to_run:
-        # Vector
+        # Vector Search
         v_res = vector_db.as_retriever(search_kwargs={"k": INITIAL_K}).invoke(q)
-        # Keyword
+        
+        # Keyword Search (Hybrid)
         k_res = []
         if "Hybrid Search" in selected_techniques:
             bm25 = BM25Retriever.from_documents(all_docs_objs)
@@ -101,20 +93,18 @@ def perform_rag(query, vector_db, llm, selected_techniques):
         temp_docs.extend(merged)
 
     docs = merge_documents(temp_docs, [])
-    log_steps.append(f"🔍 Retrieval: Pool of {len(docs)} docs from {len(queries_to_run)} queries.")
+    log_steps.append(f"🔍 Retrieval: Pool of {len(docs)} docs found.")
 
     # --- POST-PROCESSING ---
 
-    # 4. Reranking (Real LLM Scoring)
+    # 4. Reranking
     if "Reranking" in selected_techniques and docs:
-        log_steps.append("🥇 Reranking: LLM Scoring...")
+        log_steps.append("🥇 Reranking: AI Scoring...")
         scored = []
         for d in docs:
+            # ใช้ LLM ให้คะแนน 0-10
             prompt = ChatPromptTemplate.from_template(
-                """Rate relevance (0-10) of the text to query '{q}'. 
-                If the text contains a direct definition, biography, or exact answer, give 10.
-                Output ONLY the number.
-                Text: {t}"""
+                "Rate relevance (0-10) of text to query '{q}'. Text: {t}. Output ONLY number."
             )
             try:
                 res = (prompt | llm | StrOutputParser()).invoke({"q": query, "t": d.page_content[:500]})
@@ -123,33 +113,32 @@ def perform_rag(query, vector_db, llm, selected_techniques):
                 score = 5.0
             d.metadata['score'] = score
             scored.append(d)
-        
+        # เรียงและตัดเหลือ Top 5
         docs = sorted(scored, key=lambda x: x.metadata.get('score', 0), reverse=True)[:5]
 
-    # 5. Parent-Document (Real File I/O)
+    # 5. Parent-Document
     if "Parent-Document" in selected_techniques and docs:
         log_steps.append("📂 Parent-Document: Fetching FULL files...")
         new_docs = []
-        processed_files = set()
+        seen_src = set()
         for d in docs:
             fname = d.metadata.get('source_doc')
-            if fname and fname not in processed_files:
+            if fname and fname not in seen_src:
                 full_text = get_full_file_content(fname)
                 if not full_text.startswith("[Error"):
                     new_d = Document(page_content=full_text, metadata=d.metadata)
                     new_docs.append(new_d)
-                    processed_files.add(fname)
-        if new_docs:
-            docs = new_docs[:2]
+                    seen_src.add(fname)
+        if new_docs: docs = new_docs[:2] # เอาแค่ 2 ไฟล์พอ เดี๋ยว Token เต็ม
 
-    # 6. Context Compression (Real Extraction)
+    # 6. Context Compression
     if "Context Compression" in selected_techniques and docs:
         log_steps.append("✂️ Compression: Extracting key info...")
         compressed = []
         for d in docs:
             if len(d.page_content) > 500:
                 prompt = ChatPromptTemplate.from_template(
-                    "Extract sentences answering '{q}' from text. Keep names/dates. Text: {t}"
+                    "Extract only sentences answering '{q}' from text: {t}"
                 )
                 extracted = (prompt | llm | StrOutputParser()).invoke({"q": query, "t": d.page_content[:1500]})
                 d.page_content = extracted
