@@ -9,51 +9,58 @@ from modules.rag_pipeline import perform_rag
 from modules.languages import get_text, get_lesson
 from modules.visuals import render_tech_flowchart
 
-# --- Page Config ---
-st.set_page_config(page_title="RAGScope Pro", page_icon="", layout="wide")
+# --- Page Config (No Emoji Icon) ---
+st.set_page_config(page_title="RAGScope Pro", layout="wide")
 
 # --- Custom CSS ---
 st.markdown("""
 <style>
-    /* 🔥 HIDDEN STREAMLIT HEADER 🔥 */
-    /* ซ่อนแถบด้านบนสุด (Deploy button & Menu) */
+    /* HIDDEN STREAMLIT HEADER */
     header {visibility: hidden;}
     [data-testid="stHeader"] {display: none;}
     
-    /* ขยับเนื้อหาขึ้นไปชิดขอบจอสุดๆ (เพราะไม่มี Header แล้ว) */
     .block-container { padding-top: 1rem !important; }
     
-    /* ปรับแต่งปุ่มกดทั่วไป */
+    /* Button Styles */
     div.stButton > button { 
-        width: 100%; border-radius: 8px; font-weight: 600; height: 3.2em; 
+        width: 100%; border-radius: 6px; font-weight: 600; height: 3.2em; 
         background-color: #f8fafc; border: 1px solid #cbd5e1; color: #334155;
         transition: all 0.2s;
     }
     div.stButton > button:hover { background-color: #e2e8f0; transform: translateY(-1px); }
     
-    /* Custom Title Class */
-    .custom-title { 
-        font-size: 2.5rem; font-weight: 800; color: #1e293b; 
-        margin: 0; padding: 0; line-height: 1.2;
-    }
-    .custom-welcome-title {
-        font-size: 3.5rem; font-weight: 800; color: #1e293b; 
-        text-align: center; margin-top: 20px;
-    }
-    
-    /* Welcome Styles */
+    /* Typography */
+    .custom-title { font-size: 2.5rem; font-weight: 800; color: #1e293b; margin: 0; padding: 0; line-height: 1.2; }
+    .custom-welcome-title { font-size: 3.5rem; font-weight: 800; color: #1e293b; text-align: center; margin-top: 20px; }
     .welcome-subtitle { font-size: 1.3rem; color: #64748b; text-align: center; margin-bottom: 3rem;}
-    .feature-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; height: 100%; }
-    .feature-icon { font-size: 2.5rem; margin-bottom: 15px; }
-    .feature-title { font-weight: bold; color: #0f172a; font-size: 1.1rem; margin-bottom: 8px; }
+    
+    /* Cards */
+    .feature-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; height: 100%; }
+    .feature-title { font-weight: bold; color: #0f172a; font-size: 1.1rem; margin-bottom: 8px; margin-top: 10px; }
     .feature-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; }
     
-    /* Dashboard Styles */
+    /* Status & Logs */
     .active-status { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 6px; text-align: center; font-weight: 600; margin-bottom: 20px; }
     .source-ref { font-size: 0.85em; background: #fff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid #10b981; }
     .log-entry { font-family: 'Courier New', monospace; font-size: 0.8em; background: #f1f5f9; padding: 8px; margin-bottom: 4px; border-radius: 4px; }
+    
+    /* Lessons */
     .lesson-container { border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; background-color: #ffffff; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     .process-box { background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin: 15px 0; border-radius: 0 4px 4px 0; white-space: pre-line; color: #334155; line-height: 1.6; }
+
+    /* PRO CREDIT STYLE */
+    .pro-credit {
+        font-family: 'Helvetica Neue', sans-serif;
+        font-size: 0.75rem;
+        color: #94a3b8;
+        text-align: center;
+        margin-top: 25px;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+    .pro-credit:hover { opacity: 1; }
+    .pro-credit a { color: #64748b; text-decoration: none; font-weight: 600; }
+    .pro-credit a:hover { color: #3b82f6; text-decoration: underline; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -65,46 +72,30 @@ if "lang" not in st.session_state: st.session_state["lang"] = "en"
 # 🏠 PART 1: WELCOME PAGE
 # ==========================================
 def render_welcome_page():
-    # --- Top Bar ---
+    # Top Bar (Language)
     c_spacer, c_lang = st.columns([0.85, 0.15])
     with c_lang:
-        l_opt = st.selectbox("Lang", ["🇺🇸 EN", "🇹🇭 TH"], 
+        l_opt = st.selectbox("Lang", ["EN", "TH"], 
                              index=0 if st.session_state["lang"]=="en" else 1, 
                              key="welcome_lang", label_visibility="collapsed")
-        new_lang = "en" if "🇺🇸" in l_opt else "th"
+        new_lang = "en" if "EN" in l_opt else "th"
         if new_lang != st.session_state["lang"]:
             st.session_state["lang"] = new_lang
             st.rerun()
-
     lang = st.session_state["lang"]
     
-    # Hero Section
-    st.markdown(f"<div class='custom-welcome-title'> {get_text(lang, 'welcome_title')}</div>", unsafe_allow_html=True)
+    # Hero
+    st.markdown(f"<div class='custom-welcome-title'>{get_text(lang, 'welcome_title')}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='welcome-subtitle'>{get_text(lang, 'welcome_sub')}</div>", unsafe_allow_html=True)
 
-    # Features
+    # Features (No Emojis)
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.markdown(f"""
-        <div class='feature-card'>
-            <div class='feature-icon'></div>
-            <div class='feature-title'>{get_text(lang, 'feat_1_title')}</div>
-            <div class='feature-desc'>{get_text(lang, 'feat_1_desc')}</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class='feature-card'><div class='feature-title'>{get_text(lang, 'feat_1_title')}</div><div class='feature-desc'>{get_text(lang, 'feat_1_desc')}</div></div>""", unsafe_allow_html=True)
     with c2:
-        st.markdown(f"""
-        <div class='feature-card'>
-            <div class='feature-icon'></div>
-            <div class='feature-title'>{get_text(lang, 'feat_2_title')}</div>
-            <div class='feature-desc'>{get_text(lang, 'feat_2_desc')}</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class='feature-card'><div class='feature-title'>{get_text(lang, 'feat_2_title')}</div><div class='feature-desc'>{get_text(lang, 'feat_2_desc')}</div></div>""", unsafe_allow_html=True)
     with c3:
-        st.markdown(f"""
-        <div class='feature-card'>
-            <div class='feature-icon'></div>
-            <div class='feature-title'>{get_text(lang, 'feat_3_title')}</div>
-            <div class='feature-desc'>{get_text(lang, 'feat_3_desc')}</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class='feature-card'><div class='feature-title'>{get_text(lang, 'feat_3_title')}</div><div class='feature-desc'>{get_text(lang, 'feat_3_desc')}</div></div>""", unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -115,6 +106,9 @@ def render_welcome_page():
         st.info(get_text(lang, 'api_req'))
         api_input = st.text_input(get_text(lang, 'enter_key'), type="password", placeholder="gsk_...")
         
+        st.markdown(f"<small>{get_text(lang, 'get_key_info')}</small>", unsafe_allow_html=True)
+        st.markdown("")
+
         if st.button(get_text(lang, 'btn_enter'), type="primary"):
             if api_input.startswith("gsk_"):
                 st.session_state["groq_api_key"] = api_input
@@ -123,39 +117,44 @@ def render_welcome_page():
                 st.rerun()
             else:
                 st.error(get_text(lang, 'invalid_key'))
+        
+        # PRO CREDIT
+        st.markdown("""
+        <div class='pro-credit'>
+            Created by <b>Sitta Boonkaew</b><br>
+            <a href='https://github.com/sitta07' target='_blank'>github.com/sitta07</a>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ==========================================
 # 🖥️ PART 2: DASHBOARD
 # ==========================================
 def render_dashboard():
-    # --- Top Bar ---
+    # Top Bar (Title + Lang)
     c_title, c_lang = st.columns([0.85, 0.15])
-    
     with c_title:
         st.markdown(f"<div class='custom-title'>{get_text(st.session_state['lang'], 'title')}</div>", unsafe_allow_html=True)
-        
     with c_lang:
-        l_opt = st.selectbox("Lang", ["🇺🇸 EN", "🇹🇭 TH"], 
+        l_opt = st.selectbox("Lang", ["EN", "TH"], 
                              index=0 if st.session_state["lang"]=="en" else 1, 
                              key="dash_lang", label_visibility="collapsed")
-        new_lang = "en" if "🇺🇸" in l_opt else "th"
+        new_lang = "en" if "EN" in l_opt else "th"
         if new_lang != st.session_state["lang"]:
             st.session_state["lang"] = new_lang
             st.rerun()
-            
     lang = st.session_state["lang"]
 
-    # --- Sidebar & Logic ---
+    # Sidebar
     with st.sidebar:
         st.header("System Config")
-        st.success("✅ API Key Configured")
+        st.success("API Key Configured") # Removed Checkmark
         if st.button("Logout"):
             st.session_state["groq_api_key"] = ""
             st.rerun()
         st.markdown("---")
         try:
             vector_db = load_vector_db("harry_potter_lore")
-            st.success("Database Connected")
+            st.success("Database Connected") # Removed Checkmark
         except:
             st.error("Database Error")
         with st.expander("Data Explorer"):
@@ -164,8 +163,17 @@ def render_dashboard():
                 f = st.selectbox("File", files)
                 if st.button(get_text(lang, 'btn_read')):
                     st.text_area("Content", get_full_file_content(f), height=300)
+        
+        # PRO CREDIT (Sidebar)
+        st.markdown("---")
+        st.markdown("""
+        <div class='pro-credit' style='margin-top: 10px;'>
+            Created by <b>Sitta Boonkaew</b><br>
+            <a href='https://github.com/sitta07' target='_blank'>github.com/sitta07</a>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # --- Tabs ---
+    # Helper Functions
     def set_preset(name):
         st.session_state["active_mode"] = name
         for t in TECHNIQUE_INFO: st.session_state[f"chk_{t}"] = False
@@ -174,6 +182,7 @@ def render_dashboard():
     def get_selected_techs():
         return [t for t in TECHNIQUE_INFO if st.session_state.get(f"chk_{t}", False)]
 
+    # Tabs
     t1, t2, t3 = st.tabs([get_text(lang, 'subheader_chat'), get_text(lang, 'subheader_ab'), get_text(lang, 'subheader_learn')])
 
     # Tab 1: Chat
@@ -182,8 +191,7 @@ def render_dashboard():
         with c_conf:
             st.subheader(get_text(lang, 'subheader_config'))
             if "active_mode" not in st.session_state: st.session_state["active_mode"] = "Custom Manual"
-            st.markdown(f"<div class='active-status'>✅ {get_text(lang, 'active_strategy')}: {st.session_state['active_mode']}</div>", unsafe_allow_html=True)
-            
+            st.markdown(f"<div class='active-status'>{get_text(lang, 'active_strategy')}: {st.session_state['active_mode']}</div>", unsafe_allow_html=True)
             st.markdown(f"**{get_text(lang, 'presets')}**")
             pc1, pc2 = st.columns(2)
             for i, (k, v) in enumerate(PIPELINE_PRESETS.items()):
@@ -213,7 +221,7 @@ def render_dashboard():
                         st.markdown(m["content"], unsafe_allow_html=True)
                         if "meta" in m:
                             meta = m['meta']
-                            with st.expander(f"📊 {get_text(lang, 'analysis')} ({meta['lat']:.2f}s | ${meta['cost']:.5f})"):
+                            with st.expander(f"{get_text(lang, 'analysis')} ({meta['lat']:.2f}s | ${meta['cost']:.5f})"):
                                 tabs = st.tabs([get_text(lang, 'logs'), get_text(lang, 'context')])
                                 with tabs[0]: 
                                     for l in meta['logs']: st.markdown(f"<div class='log-entry'>{l}</div>", unsafe_allow_html=True)
@@ -279,18 +287,7 @@ def render_dashboard():
         all_techs = list(TECHNIQUE_INFO.keys())
         for i, tech_name in enumerate(all_techs):
             lesson = get_lesson(lang, tech_name)
-            st.markdown(f"""
-            <div class="lesson-container">
-                <div class="lesson-header">
-                    <div class="lesson-number">{i+1}</div>
-                    <div class="lesson-title">{tech_name} ({lesson.get('concept', '')})</div>
-                </div>
-                <div><b> Problem:</b> {lesson.get('problem', '')}</div>
-                <div class="process-box"><b> Process Flow:</b><br>{lesson.get('process', '')}</div>
-                <div style="font-size:0.9em; color:#64748b; margin-top:10px;">
-                    <b>⚙️ Technical Implementation:</b> {lesson.get('technical', '')}
-                </div>
-            </div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="lesson-container"><div class="lesson-header"><div class="lesson-number">{i+1}</div><div class="lesson-title">{tech_name} ({lesson.get('concept', '')})</div></div><div><b>Problem:</b> {lesson.get('problem', '')}</div><div class="process-box"><b>Process Flow:</b><br>{lesson.get('process', '')}</div><div style="font-size:0.9em; color:#64748b; margin-top:10px;"><b>Technical Implementation:</b> {lesson.get('technical', '')}</div></div>""", unsafe_allow_html=True)
             render_tech_flowchart(tech_name)
             st.markdown("<div style='margin-bottom: 50px;'></div>", unsafe_allow_html=True)
 

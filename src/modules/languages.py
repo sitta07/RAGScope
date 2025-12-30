@@ -14,6 +14,7 @@ TEXTS = {
         "get_started": "Get Started",
         "api_req": "This system requires a Groq API Key to run the Llama 3 model (70B).",
         "enter_key": "Enter Groq API Key",
+        "get_key_info": "Don't have a key? Get one for free at <a href='https://console.groq.com/keys' target='_blank'>console.groq.com</a>",
         "btn_enter": "Enter System",
         "invalid_key": "Invalid API Key format. It should start with 'gsk_'",
         "access_granted": "Access Granted! Redirecting...",
@@ -36,9 +37,8 @@ TEXTS = {
         "btn_read": "Read File",
         "btn_compare": "Compare Strategies",
         "learn_intro": "Learn RAG concepts from scratch, just like a Computer Science 101 class.",
-        # (Lessons ส่วนเดิม...)
+        # (Lessons คงเดิม...)
         "lessons": { 
-            # ... (คงเดิม ไม่ต้องแก้ส่วน lessons) ... 
              "Hybrid Search": {
                 "concept": "Keyword Match (Ctrl+F) + Semantic Match (Meaning)",
                 "problem": "Basics: A 'Keyword' is an exact string of characters.\n\nScenario: You search for 'PC'.\n- Keyword Search: Finds text containing 'PC'.\n- Problem: It misses text containing 'Computer' or 'Laptop' because the strings don't match.\n- Vector Search: Finds 'Laptop' because it knows it means the same as 'PC', but might miss specific part numbers like 'PC-98'.",
@@ -102,6 +102,7 @@ TEXTS = {
         "get_started": "เริ่มต้นใช้งาน",
         "api_req": "ระบบต้องใช้ Groq API Key เพื่อรันโมเดล Llama 3 (70B) ในการประมวลผล",
         "enter_key": "กรอก Groq API Key",
+        "get_key_info": "ยังไม่มี Key? สมัครฟรีได้ที่ <a href='https://console.groq.com/keys' target='_blank'>console.groq.com</a>",
         "btn_enter": "เข้าสู่ระบบ",
         "invalid_key": "รูปแบบ API Key ไม่ถูกต้อง ต้องขึ้นต้นด้วย 'gsk_'",
         "access_granted": "ยืนยันตัวตนสำเร็จ! กำลังเข้าสู่ระบบ...",
@@ -112,7 +113,7 @@ TEXTS = {
         "subheader_chat": "ระบบสนทนา",
         "subheader_ab": "เปรียบเทียบผลลัพธ์ (A/B Test)",
         "subheader_learn": "RAG Academy: ปูพื้นฐานละเอียด (CS101)",
-        "active_strategy": "กลยุทธ์ปัจจุบัน",
+        "active_strategy": "เทคนิคปัจจุบัน",
         "presets": "ชุดคำสั่งด่วน",
         "manual": "กำหนดค่าเอง",
         "placeholder": "พิมพ์คำถามของคุณที่นี่...",
@@ -124,8 +125,8 @@ TEXTS = {
         "btn_read": "อ่านไฟล์",
         "btn_compare": "เริ่มเปรียบเทียบ",
         "learn_intro": "เรียนรู้หลักการทำงานของ RAG เหมือนนั่งเรียนวิชาเขียนโปรแกรมเบื้องต้น",
-        # (Lessons ส่วนเดิม...)
-        "lessons": { 
+        # (Lessons คงเดิม...)
+        "lessons": {
              "Hybrid Search": {
                 "concept": "การค้นหาแบบผสม (Keyword Match + Semantic Match)",
                 "problem": "พื้นฐาน: 'Keyword' คือข้อความที่ต้องตรงกันเป๊ะๆ (เหมือนกด Ctrl+F)\n\nสถานการณ์: คุณค้นหาคำว่า 'ยารักษาหวัด'\n- Keyword Search: จะหาเฉพาะเอกสารที่มีคำว่า 'ยารักษาหวัด' เป๊ะๆ\n- ปัญหา: มันจะไม่เจอเอกสารที่เขียนว่า 'สมุนไพรแก้คัดจมูก' (เพราะตัวอักษรไม่เหมือนกัน)\n- Vector Search: จะหาเจอ เพราะมันรู้ว่า 'หวัด' กับ 'คัดจมูก' คือเรื่องเดียวกัน",
