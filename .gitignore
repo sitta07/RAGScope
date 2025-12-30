@@ -35,3 +35,8 @@ env/
 
 # Project Specific (Data & Artifacts)
 processed_data/ 
+
+# .gitignore
+
+*.pyc
+.DS_Store
