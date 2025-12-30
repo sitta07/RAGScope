@@ -33,9 +33,6 @@ env/
 .vscode/
 .idea/
 
-# Project Specific (Data & Artifacts)
-processed_data/ 
-
 # .gitignore
 
 *.pyc
