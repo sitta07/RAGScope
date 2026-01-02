@@ -82,7 +82,7 @@ winget install graphviz
 ### 2. Clone Repository
 
 ```bash
-git clone [https://github.com/sitta07/ragscope-pro.git](https://github.com/sitta07/ragscope-pro.git)
+git clone https://github.com/sitta07/RAGScope.git
 cd ragscope-pro
 ```
 
