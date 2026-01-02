@@ -127,7 +127,7 @@ Enter the key in the Welcome Screen when the app launches.
 (Optional) For deployment, set groq_api_key in Streamlit Secrets.
 
 ### 👨‍💻 Author
-Sitta Boonkaew 
+## Sitta Boonkaew 
 AI Engineer Intern @ AI SmartTech
 
 ### 📄 License
