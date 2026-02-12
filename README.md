@@ -10,6 +10,56 @@
 
 Designed for AI Engineers and Data Scientists, this platform moves beyond simple "chat with PDF" tutorials. It provides a rigorous environment to **benchmark, visualize, and debug** complex retrieval strategies—including Hybrid Search, Reranking, and HyDE—using real-time execution logs and cost analysis.
 
+```mermaid
+graph TD
+    subgraph Frontend_Layer [UI and Observability]
+        UI[Streamlit Interface]
+        Monitor[Cost and Latency Monitoring]
+        Trace[Execution Tracing]
+        ABTest[A/B Testing Dashboard]
+    end
+
+    subgraph Orchestration_Layer [LangChain Logic]
+        Router[Query Router]
+        Strategies[RAG Strategies: Hybrid / HyDE / Multi-Query]
+        Reranker[Cross-Encoder Reranker]
+    end
+
+    subgraph Data_Layer [Knowledge Base]
+        VectorDB[ChromaDB - Vector Search]
+        BM25[BM25 - Keyword Search]
+        Docs[Raw Documents]
+    end
+
+    subgraph Inference_Layer [LLM Provider]
+        Groq[Groq API]
+        Llama[Llama 3 70B]
+    end
+
+    %% Flow of Information
+    UI --> Router
+    Router --> Strategies
+    Strategies --> VectorDB
+    Strategies --> BM25
+    
+    VectorDB --> Reranker
+    BM25 --> Reranker
+    
+    Reranker --> Groq
+    Groq --> Llama
+    Llama --> UI
+    
+    %% Monitoring Feedback
+    Groq -.-> Monitor
+    Strategies -.-> Trace
+    Llama -.-> ABTest
+
+    %% Styling
+    style Frontend_Layer fill:#f0f0f0,stroke:#333
+    style Orchestration_Layer fill:#e1f5fe,stroke:#01579b
+    style Data_Layer fill:#f1f8e9,stroke:#33691e
+    style Inference_Layer fill:#fff3e0,stroke:#e65100
+```
 ---
 
 ## Key Features
