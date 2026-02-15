@@ -8,7 +8,7 @@
 
 **RAGScope Pro** is an enterprise-grade visualization and experimentation workbench for **Retrieval-Augmented Generation (RAG)** systems.
 
-Designed for AI Engineers and Data Scientists, this platform moves beyond simple "chat with PDF" tutorials. It provides a rigorous environment to **benchmark, visualize, and debug** complex retrieval strategies—including Hybrid Search, Reranking, and HyDE—using real-time execution logs and cost analysis.
+Designed for AI Engineers and Data Scientists, this platform moves beyond simple "chat with PDF" tutorials. (HarryPotter) It provides a rigorous environment to **benchmark, visualize, and debug** complex retrieval strategies—including Hybrid Search, Reranking, and HyDE—using real-time execution logs and cost analysis.
 
 ```mermaid
 graph TD
