@@ -177,10 +177,10 @@ streamlit run src/app.py
 ### Configuration (Bring Your Own Key)
 This application uses Groq API for high-speed inference.
 
-Get a free API Key at console.groq.com.
+### Get a free API Key at:
+👉 https://console.groq.com./home
 
 Enter the key in the Welcome Screen when the app launches.
-
 (Optional) For deployment, set groq_api_key in Streamlit Secrets.
 
 ## 👨‍💻 Author
