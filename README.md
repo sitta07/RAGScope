@@ -166,6 +166,8 @@ Run the application:
 ```bash
 streamlit run src/app.py
 ```
+---
+
 ### You can try and test the application directly on the web:
 
 👉 https://ragscope-pro.streamlit.app/
