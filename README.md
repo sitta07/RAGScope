@@ -166,6 +166,11 @@ Run the application:
 ```bash
 streamlit run src/app.py
 ```
+### You can try and test the application directly on the web:
+
+👉 https://ragscope-pro.streamlit.app/
+
+**Feel free to explore the features, interact with the interface, and evaluate the system performance in real time.**
 
 ### Configuration (Bring Your Own Key)
 This application uses Groq API for high-speed inference.
