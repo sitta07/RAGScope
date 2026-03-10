@@ -4,13 +4,30 @@ import os
 import sys
 from functools import lru_cache
 
+# --- Page Config ---
+st.set_page_config(page_title="RAGScope Pro", layout="wide")
+
+# --- Session State Initialization (ปรับให้กระชับ) ---
+def init_session_state():
+    """Initialize all session state variables at once"""
+    defaults = {
+        "groq_api_key": "",
+        "lang": "en",
+        "msgs": [{"role": "assistant", "content": "System Ready."}],
+        "active_mode": "Custom Manual"
+    }
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+init_session_state()
+
 # --- Lightweight Imports (โหลดเร็ว) ---
 from modules.languages import get_text, get_lesson
 from modules.ui import inject_custom_css, render_pro_credit
 
-# --- Page Config ---
-st.set_page_config(page_title="RAGScope Pro", layout="wide")
-inject_custom_css()
+# Inject CSS with light theme
+inject_custom_css("light")
 
 # --- Caching Functions ---
 @st.cache_resource(ttl=3600)
@@ -50,29 +67,14 @@ def ensure_database_exists():
             st.error(f"Auto-ingestion failed: {e}")
     return True
 
-# --- Session State Initialization (ปรับให้กระชับ) ---
-def init_session_state():
-    """Initialize all session state variables at once"""
-    defaults = {
-        "groq_api_key": "",
-        "lang": "en",
-        "msgs": [{"role": "assistant", "content": "System Ready."}],
-        "active_mode": "Custom Manual"
-    }
-    for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
-
-init_session_state()
-
 # ==========================================
 # 🏠 PART 1: WELCOME PAGE (Lightweight)
 # ==========================================
 def render_welcome_page():
     lang = st.session_state["lang"]
     
-    # Top Right Language - Simplified
-    _, c_lang = st.columns([0.85, 0.15])
+    # Top Right Language
+    _, c_lang = st.columns([0.9, 0.1])
     with c_lang:
         l_opt = st.selectbox("Lang", ["EN", "TH"], 
                              index=0 if lang == "en" else 1, 
@@ -155,7 +157,7 @@ def render_dashboard():
     render_tech_flowchart = st.session_state['render_tech_flowchart']
     
     # Header
-    c_title, c_lang = st.columns([0.85, 0.15])
+    c_title, c_lang = st.columns([0.9, 0.1])
     with c_title:
         st.markdown(f"<div class='custom-title'>{get_text(lang, 'title')}</div>", unsafe_allow_html=True)
     with c_lang:
@@ -388,9 +390,9 @@ def render_learn_tab(lang, TECHNIQUE_INFO, render_tech_flowchart):
                 <div class="lesson-number">{i+1}</div>
                 <div class="lesson-title">{tech_name} ({lesson.get('concept', '')})</div>
             </div>
-            <div><b>Problem:</b> {lesson.get('problem', '')}</div>
+            <div style="color:#000000; white-space: pre-line;"><b>Problem:</b> {lesson.get('problem', '')}</div>
             <div class="process-box"><b>Process Flow:</b><br>{lesson.get('process', '')}</div>
-            <div style="font-size:0.9em; color:#64748b; margin-top:10px;">
+            <div style="font-size:0.9em; color:#000000; margin-top:10px;">
                 <b>Technical Implementation:</b> {lesson.get('technical', '')}
             </div>
         </div>

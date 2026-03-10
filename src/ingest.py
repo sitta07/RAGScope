@@ -31,7 +31,7 @@ def main():
     # Metadata for Parent-Doc
     for chunk in chunks:
         chunk.metadata['source_doc'] = os.path.basename(chunk.metadata.get('source', ''))
-        chunk.metadata['chunk_id'] = str(uuid.uuid4())
+        chunk.metadata['chunk_id'] = str(uuid.uuid4())  
 
     print(f"✂️ Created {len(chunks)} chunks.")
 

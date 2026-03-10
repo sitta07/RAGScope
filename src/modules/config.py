@@ -1,8 +1,12 @@
 import os
 
+# Get project root directory
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+
 # Paths
-DATA_FOLDER = "./data"
-DB_PATH = "./processed_data/chroma_db"
+DATA_FOLDER = os.path.join(BASE_DIR, "data")
+DB_PATH = os.path.join(BASE_DIR, "processed_data", "chroma_db")
+
 COLLECTION_NAME = "harry_potter_lore"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 

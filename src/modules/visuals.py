@@ -1,7 +1,7 @@
 import graphviz
 import streamlit as st
 
-def render_tech_flowchart(tech_name):
+def render_tech_flowchart(tech_name, is_mobile=False):
     """
     Renders a detailed engineering-grade flowchart for RAG techniques using Graphviz.
     """
